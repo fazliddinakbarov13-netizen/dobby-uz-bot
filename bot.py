@@ -283,6 +283,23 @@ def smart_split(text: str, max_length: int) -> list[str]:
 
 # ─── Telegram komandalar ─────────────────────────────────────────────
 
+async def notify_admins(context: ContextTypes.DEFAULT_TYPE, user, action: str) -> None:
+    """Adminga foydalanuvchi harakati haqida qisqacha xabar berish."""
+    if not ADMIN_IDS:
+        return
+    if user.id in ADMIN_IDS:
+        return  # Adminning o'ziga yubormaymiz
+
+    username = f"@{user.username}" if user.username else "Mavjud emas"
+    msg = f"🔔 FOYDALANUVCHI FAOLLIGI\n\n👤 Foydalanuvchi: {user.first_name}\n🔗 Username: {username}\n🆔 ID: {user.id}\n⚡ Harakat: {action}"
+    
+    for admin_id in ADMIN_IDS:
+        try:
+            await context.bot.send_message(chat_id=admin_id, text=msg)
+        except Exception:
+            pass  # Xatolik bo'lsa indamaymiz (masalan, admin botni bloklagan bo'lsa)
+
+
 
 async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """/start — Dobby bilan tanishish."""
@@ -334,6 +351,9 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
     # Foydalanuvchini bazaga saqlash
     register_user(user)
+
+    # Adminlarga bildirishnoma jo'natish
+    await notify_admins(context, user, "Botni boshladi (/start) 🚀")
 
     await update.message.reply_text(welcome, reply_markup=reply_markup)
 
@@ -776,6 +796,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
     # Foydalanuvchini ro'yxatga olish
     register_user(update.effective_user)
 
+    # Adminlarga bildirishnoma jo'natish
+    short_text = user_text[:50] + "..." if len(user_text) > 50 else user_text
+    await notify_admins(context, update.effective_user, f"Xabar yozdi: {short_text} 💬")
+
     # "Yozmoqda..." ko'rsatish
     await update.message.chat.send_action(ChatAction.TYPING)
 
@@ -806,6 +830,9 @@ async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> No
 
     # Foydalanuvchini ro'yxatga olish
     register_user(update.effective_user)
+
+    # Adminlarga bildirishnoma jo'natish
+    await notify_admins(context, update.effective_user, "Rasm yubordi 📷")
 
     await update.message.chat.send_action(ChatAction.TYPING)
 
