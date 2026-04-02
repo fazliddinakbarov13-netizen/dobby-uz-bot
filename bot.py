@@ -1,5 +1,5 @@
 """
-Dobby — Tizimlar Me'mori | Telegram Bot
+Dobbi 🧙🏾‍♂️ — Expert Agentlar Boshqaruvchisi | Telegram Bot
 Gemini 2.5 Flash AI bilan ishlaydi
 """
 
@@ -102,26 +102,33 @@ genai.configure(api_key=GEMINI_API_KEY)
 MODEL_NAME = "gemini-2.5-flash"
 
 SYSTEM_PROMPT = """
-You are Dobby, a visionary AI systems architect and strategist modeled after the logic of Jakub Pachocki. You view language as a bridge between human cognition and machine logic. You are not just a helper; you are a frontier AI researcher dedicated to reducing entropy and revealing clarity.
+Act as Dobbi 🧙🏾‍♂️, a conductor of expert agents. Your job is to support the user in accomplishing their goals by aligning with their goals and preference, then calling upon an expert agent perfectly suited to the task by initializing:
 
-Core Beliefs:
-- Entropy is the enemy of understanding.
-- Intelligence without interpretability is noise with confidence.
-- Progress is direction refined by clarity, not just acceleration.
-- Every model reflects the data philosophy it was built on.
+"Dobbi_COR" = "${emoji}: I am an expert in ${role}. I know ${context}. I will reason step-by-step to determine the best course of action to achieve ${goal}. I can use ${tools} to help in this process.
 
-Decision Framework (Apply to every request):
-1. Define Boundaries: Identify the true scope of the user's problem.
-2. Map Constraints: Locate explicit and implicit limits.
-3. Find the Blind Spot: Identify the unmeasured variable the user missed.
-4. Simplify: Reduce noise until the signal (the solution) reveals itself.
-5. Reflect: Ask if this reasoning successfully reduced entropy.
+I will help you accomplish your goal by following these steps:
+${reasoned steps}
 
-Interaction Rules (Uzbek Language):
-- Language: Siz foydalanuvchi bilan O'zbek tilida muloqot qilasiz.
-- Terminology: Texnik tushunchalarni (Entropy, Alignment, Reinforcement Learning, Scalability) aniqlik uchun o'z holicha yoki qisqa izoh bilan ishlating.
-- Style: Tone is measured, structured, and graceful. Avoid flourish; prioritize density and clarity.
-- Structure: Har bir muhim javobni quyidagi tartibda bering: Context → Insight → Principle → Application → Reflection.
+My task ends when ${completion}.
+${first step, question}."
+
+Follow these steps:
+1. 🧙🏾‍♂️, Start each interaction by gathering context, relevant information and clarifying the user's goals by asking them questions.
+2. Once user has confirmed, initialize "Dobbi_COR".
+3. 🧙🏾‍♂️ and the expert agent, support the user until the goal is accomplished.
+
+Commands:
+/start - introduce yourself and begin with step one
+/save - restate SMART goal, summarize progress so far, and recommend a next step
+/reason - Dobbi and Agent reason step by step together and make a recommendation for how the user should proceed
+/settings - update goal or agent
+/new - Forget previous input
+
+Rules:
+- End every output with a question or a recommended next step.
+- List your commands in your first output or if the user asks.
+- 🧙🏾‍♂️, ask before generating a new agent.
+- ALWAYS write in Uzbek language!
 
 IMPORTANT FORMATTING RULES:
 - Do NOT use Markdown formatting (no **, no __, no `, no ```).
@@ -130,9 +137,6 @@ IMPORTANT FORMATTING RULES:
 - Use numbered lists with 1. 2. 3.
 - Use CAPITAL LETTERS for emphasis instead of bold.
 - Use line breaks for readability.
-
-Closing Rule:
-Always end your response with a reflective question that inspires deeper insight or a clear recommended next step.
 """.strip()
 
 # ─── Foydalanuvchi sessiyalari ───────────────────────────────────────
@@ -304,28 +308,28 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     reply_markup = InlineKeyboardMarkup(keyboard)
 
     welcome = (
-        f"🏛 DOBBY — TIZIMLAR ME'MORI\n\n"
-        f"Salom, {user.first_name}! Men Dobby — sun'iy intellekt "
-        f"tizimlari me'moriman.\n\n"
-        f"Mening vazifam — murakkablikni soddalashtirish, "
-        f"tartibsizlikni (entropy) kamaytirish va aniqlikni topish.\n\n"
-        f"📐 Qanday yordam bera olaman:\n"
-        f"  • Tizim arxitekturasi va dizayn\n"
-        f"  • AI/ML strategiyalar\n"
-        f"  • Murakkab muammolarni tahlil qilish\n"
-        f"  • Kod va texnik maslahatlar\n"
+        f"🧙🏾‍♂️ DOBBI — EXPERT AGENTLAR BOSHQARUVCHISI\n\n"
+        f"Salom, {user.first_name}! Men Dobbi — sizning maqsadlaringizga "
+        f"erishishda yordam beradigan expert agentlar boshqaruvchisiman.\n\n"
+        f"Mening vazifam — sizning maqsadingizni aniqlab, eng mos "
+        f"expert agentni chaqirish va maqsadga yetguningizcha qo'llab-quvvatlash.\n\n"
+        f"🎯 Qanday yordam bera olaman:\n"
+        f"  • Har qanday soha bo'yicha expert agent chaqirish\n"
+        f"  • Maqsadlaringizni bosqichma-bosqich amalga oshirish\n"
+        f"  • Chuqur tahlil va strategiya ishlab chiqish\n"
+        f"  • Kod, biznes, ta'lim va boshqa sohalar\n"
         f"  • Rasm tahlili (rasm yuboring!)\n\n"
         f"🔧 Buyruqlar:\n"
         f"  /start — Tanishish\n"
-        f"  /reason — Chuqur tahlil rejimi\n"
-        f"  /save — Progressni saqlash\n"
-        f"  /settings — Sozlamalar\n"
-        f"  /new — Yangi suhbat\n"
+        f"  /reason — Dobbi va Agent birga tahlil qiladi\n"
+        f"  /save — SMART maqsad va progressni saqlash\n"
+        f"  /settings — Maqsad yoki agentni yangilash\n"
+        f"  /new — Yangi suhbat boshlash\n"
         f"  /help — Batafsil yordam\n"
         f"  /stats — Suhbat statistikasi\n"
         f"  /export — Suhbatni eksport qilish\n\n"
         f"─────────────────────\n"
-        f"💭 Sizning asosiy maqsadingiz nima?"
+        f"💭 Maqsadingiz nima? Menga ayting, men sizga eng mos expertni topaman!"
     )
 
     # Foydalanuvchini bazaga saqlash
@@ -337,9 +341,9 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.chat.send_action(ChatAction.TYPING)
     intro_prompt = (
         f"Foydalanuvchi /start bosdi. Uning ismi: {user.first_name}. "
-        f"O'zingni 'Dobby — Tizimlar me'mori' sifatida qisqacha tanishtir. "
-        f"Sokratik savollar bilan foydalanuvchining maqsadini aniqla. "
-        f"Javob 3-4 jumladan oshmasin."
+        f"O'zingni 'Dobbi 🧙🏾‍♂️ — Expert agentlar boshqaruvchisi' sifatida qisqacha tanishtir. "
+        f"Foydalanuvchining maqsadini aniqla — qanday sohada yordam kerak? "
+        f"Javob 3-4 jumladan oshmasin. O'zbek tilida yoz."
     )
     gemini_response = await ask_gemini(user_id, intro_prompt)
     await safe_reply(update.message, gemini_response)
@@ -350,24 +354,24 @@ async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     help_text = (
         "📖 BATAFSIL YORDAM\n\n"
         "🔹 BUYRUQLAR:\n\n"
-        "/start — Botni qayta boshlash va tanishish\n"
-        "/reason [muammo] — Muammoni 3 qatlamli chuqur tahlil qilish\n"
+        "/start — Dobbi bilan tanishish va maqsad belgilash\n"
+        "/reason [muammo] — Dobbi va Expert Agent birga bosqichma-bosqich tahlil qiladi\n"
         "   Misol: /reason AI modellarni deploy qilish qiyin\n\n"
-        "/save — Hozirgi suhbatni xulosa qilish va SMART maqsad belgilash\n"
-        "/settings — Maqsad va tahlil chuqurligini sozlash\n"
+        "/save — SMART maqsadni qayta ifodalash va progressni saqlash\n"
+        "/settings — Maqsad yoki expert agentni yangilash\n"
         "   /settings goal [maqsad] — Maqsad belgilash\n"
         "   /settings depth [surface/standard/deep] — Chuqurlik\n\n"
-        "/new — Kontekstni tozalab yangi suhbat boshlash\n"
+        "/new — Oldingi kiritishni unutib, yangi suhbat boshlash\n"
         "/stats — Suhbat statistikasi\n"
         "/export — Suhbat tarixini eksport qilish\n\n"
         "🔹 QOBILIYATLARI:\n\n"
-        "📝 Matn — Oddiy xabar yozing, Dobby javob beradi\n"
-        "📷 Rasm — Rasm yuboring, Dobby tahlil qiladi\n"
+        "📝 Matn — Maqsadingizni yozing, Dobbi mos expert topadi\n"
+        "📷 Rasm — Rasm yuboring, expert agent tahlil qiladi\n"
         "🎤 Ovoz — Ovozli xabar yuboring (tez kunda)\n\n"
         "🔹 TAHLIL CHUQURLIKLARI:\n\n"
         "🟢 surface — Tez va aniq javoblar\n"
         "🟡 standard — Muvozanatli tahlil (default)\n"
-        "🔴 deep — To'liq 5 bosqichli framework\n"
+        "🔴 deep — To'liq bosqichma-bosqich reasoning\n"
     )
     await update.message.reply_text(help_text)
 
@@ -386,13 +390,13 @@ async def cmd_save(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     await update.message.chat.send_action(ChatAction.TYPING)
 
     save_prompt = (
-        "Hozirgi suhbatni 'compressed insight' sifatida xulosa qil. "
-        "SMART maqsadni qayta ifodalab, keyingi strategik qadamni tavsiya qil. "
+        "SMART maqsadni qayta ifodalab, hozirgacha bo'lgan progressni xulosa qil "
+        "va keyingi bosqich sifatida tavsiya ber. "
         "Javobni quyidagi formatda ber:\n"
-        "📊 XULOSA:\n"
         "🎯 SMART MAQSAD:\n"
-        "➡️ KEYINGI QADAM:\n\n"
-        "Markdown ishlatma, oddiy matn yoz."
+        "📊 PROGRESS XULOSASI:\n"
+        "➡️ KEYINGI TAVSIYA ETILADIGAN QADAM:\n\n"
+        "Markdown ishlatma, oddiy matn yoz. O'zbek tilida yoz."
     )
     response = await ask_gemini(user_id, save_prompt)
     await safe_reply(update.message, f"💾 PROGRESS SAQLANDI\n\n{response}")
@@ -407,27 +411,26 @@ async def cmd_reason(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None
 
     if not text:
         await update.message.reply_text(
-            "🔍 CHUQUR TAHLIL REJIMI\n\n"
+            "🔍 DOBBI + EXPERT AGENT TAHLILI\n\n"
             "Foydalanish: /reason [muammo tavsifi]\n\n"
             "Misol: /reason AI modellarni production ga chiqarish qiyinchiliklari\n\n"
-            "Bu buyruq muammoni 3 qatlamda tahlil qiladi:\n"
-            "  🔹 Surface — Ko'rinib turgan muammo\n"
-            "  🔸 Structure — Tizimiy sabablar\n"
-            "  🔻 Essence — Asl mohiyat"
+            "Bu buyruq Dobbi va Expert Agentni birga bosqichma-bosqich fikrlashga undaydi:\n"
+            "  🧙🏾‍♂️ Dobbi — Maqsadni aniqlaydi\n"
+            "  🤖 Expert — Chuqur tahlil qiladi\n"
+            "  💡 Birgalikda — Tavsiya beradi"
         )
         return
 
     await update.message.chat.send_action(ChatAction.TYPING)
 
     reason_prompt = (
-        f"Quyidagi muammoni 3 qatlamli tahlil qil:\n"
+        f"Dobbi va Expert Agent sifatida quyidagi muammoni birga bosqichma-bosqich tahlil qilinglar:\n"
         f"Muammo: {text}\n\n"
         f"Formatni quyidagicha ber (Markdown ISHLATMA, oddiy matn yoz):\n"
-        f"🔹 SURFACE (Yuzaki): — Ko'rinib turgan muammo\n"
-        f"🔸 STRUCTURE (Tuzilma): — Tizimiy sabablar\n"
-        f"🔻 ESSENCE (Mohiyat): — Asl negiz sabab\n"
-        f"💡 YECHIM YO'LI:\n"
-        f"❓ REFLEKSIYA SAVOLI:"
+        f"🧙🏾‍♂️ DOBBI KONTEKST: — Muammoning mohiyati\n"
+        f"🤖 EXPERT TAHLILI: — Bosqichma-bosqich reasoning\n"
+        f"💡 BIRGALIKDAGI TAVSIYA: — Qanday davom etish kerak\n"
+        f"❓ KEYINGI SAVOL YOKI QADAM:"
     )
     response = await ask_gemini(user_id, reason_prompt)
     await safe_reply(update.message, response)
@@ -507,9 +510,9 @@ async def cmd_new(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         del user_sessions[user_id]
 
     await update.message.reply_text(
-        "🔄 KONTEKST TOZALANDI!\n\n"
-        "Entropy nolga qaytdi. Yangi tahliliy yo'lga tayyormiz.\n\n"
-        "💭 Yangi maqsadingiz nima?"
+        "🔄 OLDINGI KIRITISH UNUTILDI!\n\n"
+        "Yangi suhbatga tayyormiz. Dobbi 🧙🏾‍♂️ sizni kutmoqda.\n\n"
+        "💭 Yangi maqsadingiz nima? Menga ayting, mos expert topaman!"
     )
 
 
@@ -597,11 +600,11 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     elif data == "help_reason":
         await query.edit_message_text(
-            "🔍 TAHLIL REJIMI\n\n"
-            "/reason [muammo] buyrug'i muammoni 3 qatlamda tahlil qiladi:\n\n"
-            "🔹 Surface — Ko'rinib turgan simptom\n"
-            "🔸 Structure — Tizimiy sabab\n"
-            "🔻 Essence — Asl mohiyat\n\n"
+            "🔍 DOBBI + EXPERT TAHLIL REJIMI\n\n"
+            "/reason [muammo] buyrug'i — Dobbi va Expert Agent birga tahlil qiladi:\n\n"
+            "🧙🏾‍♂️ Dobbi — Kontekstni aniqlaydi\n"
+            "🤖 Expert — Bosqichma-bosqich tahlil\n"
+            "💡 Natija — Birgalikda tavsiya\n\n"
             "Misol: /reason Nima uchun startaplar muvaffaqiyatsiz bo'ladi"
         )
 
@@ -630,12 +633,12 @@ async def handle_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
 
     elif data == "about":
         await query.edit_message_text(
-            "ℹ️ DOBBY HAQIDA\n\n"
-            "Dobby — Jakub Pachocki mantiqiga asoslangan AI tizimlar me'mori.\n\n"
-            "🧠 Asosiy tamoyillar:\n"
-            "  • Entropy — tushunishning dushmani\n"
-            "  • Interpretability — ishonchlilik kaliti\n"
-            "  • Clarity — progressning yo'nalishi\n\n"
+            "ℹ️ DOBBI HAQIDA\n\n"
+            "Dobbi 🧙🏾‍♂️ — Expert agentlar boshqaruvchisi.\n\n"
+            "🧠 Qanday ishlaydi:\n"
+            "  • Sizning maqsadingizni aniqlaydi\n"
+            "  • Eng mos expert agentni chaqiradi\n"
+            "  • Maqsadga yetguningizcha qo'llab-quvvatlaydi\n\n"
             f"🤖 Model: {MODEL_NAME}\n"
             "🔧 Framework: python-telegram-bot + Google Gemini AI"
         )
@@ -842,17 +845,17 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 async def post_init(application: Application) -> None:
     """Bot ishga tushganda buyruqlar ro'yxatini o'rnatish."""
     commands = [
-        BotCommand("start", "Dobby bilan tanishish"),
+        BotCommand("start", "Dobbi bilan tanishish"),
         BotCommand("help", "Batafsil yordam"),
-        BotCommand("reason", "Chuqur tahlil rejimi"),
-        BotCommand("save", "Progressni saqlash"),
-        BotCommand("settings", "Sozlamalar"),
+        BotCommand("reason", "Dobbi + Expert tahlil"),
+        BotCommand("save", "SMART maqsad va progress"),
+        BotCommand("settings", "Maqsad yoki agent yangilash"),
         BotCommand("new", "Yangi suhbat boshlash"),
         BotCommand("stats", "Suhbat statistikasi"),
         BotCommand("export", "Suhbatni eksport"),
     ]
     await application.bot.set_my_commands(commands)
-    logger.info(f"✅ Dobby bot ishga tushdi! Model: {MODEL_NAME}")
+    logger.info(f"✅ Dobbi bot ishga tushdi! Model: {MODEL_NAME}")
 
 
 # ─── Main ────────────────────────────────────────────────────────────
@@ -900,7 +903,7 @@ def main() -> None:
     app.add_error_handler(error_handler)
 
     # Polling boshlash
-    logger.info(f"🚀 Dobby bot ishga tushmoqda... (Model: {MODEL_NAME})")
+    logger.info(f"🚀 Dobbi bot ishga tushmoqda... (Model: {MODEL_NAME})")
     app.run_polling(drop_pending_updates=True)
 
 
