@@ -324,23 +324,11 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
 
-    welcome = (
-        f"🧙🏾‍♂️ DOBBI — EXPERT AGENTLAR BOSHQARUVCHISI\n\n"
-        f"Salom, {user.first_name}! Men Dobbi — sizning maqsadlaringizga "
-        f"erishishda yordam beradigan expert agentlar boshqaruvchisiman.\n\n"
-        f"Mening vazifam — sizning maqsadingizni aniqlab, eng mos "
-        f"expert agentni chaqirish va maqsadga yetguningizcha qo'llab-quvvatlash.\n\n"
-        f"─────────────────────\n"
-        f"💭 Maqsadingiz nima? Menga ayting, men sizga eng mos expertni topaman!"
-    )
-
     # Foydalanuvchini bazaga saqlash
     register_user(user)
 
     # Adminlarga bildirishnoma jo'natish
     await notify_admins(context, user, "Botni boshladi (/start) 🚀")
-
-    await update.message.reply_text(welcome, reply_markup=reply_markup)
 
     # Gemini dan tanishish
     await update.message.chat.send_action(ChatAction.TYPING)
@@ -351,7 +339,10 @@ async def cmd_start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"Javob 3-4 jumladan oshmasin. O'zbek tilida yoz."
     )
     gemini_response = await ask_gemini(user_id, intro_prompt)
-    await safe_reply(update.message, gemini_response)
+    if len(gemini_response) <= 4096:
+        await update.message.reply_text(gemini_response, reply_markup=reply_markup)
+    else:
+        await safe_reply(update.message, gemini_response)
 
 
 async def cmd_help(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
